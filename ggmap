@@ -1,0 +1,33 @@
+library("ggplot2")
+library("ggmap")
+library("sp")
+library("maptools")
+library("rgdal")
+library(raster)
+
+#shape 파일로 받은 파일을 불러오기
+korea_map_shp = shapefile("C:/Users/admin/Desktop/행정경계지도_시도/CTPRVN_201703/TL_SCCO_CTPRVN.shp")
+korea_map_EMD = readShapePoly("C:/Users/admin/Desktop/새 폴더/EMD_201703/TL_SCCO_EMD.shp")
+korea_map_SIG = readShapePoly("C:/Users/admin/Desktop/새 폴더/SIG_201703/TL_SCCO_SIG.shp")
+
+#데이터프레임 형태로변환 
+korea_si<-fortify(korea_map_shp,region='CTPRVN_CD')
+korea_gu<-fortify(korea_map_blog,region='SIG_CD')
+korea<-fortify(korea_map_shp2,id='CTPRVN_CD')
+
+#색을 넣고 싶은값을 merge
+fire$count<-1
+fire_count<-aggregate(count~sigungu_cd,data=fire,sum)
+colnames(fire_count)<-c("id","count")
+str(fire_count)
+fire_count$id<-as.character(fire_count$id)
+korea_gu_2<-left_join(korea_gu,fire_count)
+korea_gu_2$count[is.na(korea_gu_2$count)==1]<-0
+
+#지도 그리기
+ggplot() + geom_polygon(data=korea_gu_2, aes(x=long, y=lat, group=group, fill=count))+
+  scale_fill_gradient(low='white', high='#004ea2')
+  
+
+
+  
